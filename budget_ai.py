@@ -10,15 +10,12 @@ import os
 from datetime import datetime
 from warnings import warn
 
-# ========================
-# 🔈 Voice Engine Setup
-# ========================
 class VoiceAssistant:
     def __init__(self):
         self.recognizer = sr.Recognizer()
         self.mic = sr.Microphone()
         self.engine = pyttsx3.init()
-        self.engine.setProperty('rate', 150)  # Slower speech
+        self.engine.setProperty('rate', 150)
         
     def listen(self):
         with self.mic as source:
@@ -34,9 +31,6 @@ class VoiceAssistant:
         self.engine.say(text)
         self.engine.runAndWait()
 
-# ========================
-# 🧠 Smarter AI Classifier
-# ========================
 class ExpenseClassifier:
     def __init__(self):
         self.patterns = {
@@ -52,9 +46,6 @@ class ExpenseClassifier:
                 return category
         return "Others"
 
-# ========================
-# 💎 Optimized BudgetAI Core
-# ========================
 class BudgetAI:
     def __init__(self, data_file="expenses.csv"):
         self.file = data_file
@@ -62,7 +53,6 @@ class BudgetAI:
         self.classifier = ExpenseClassifier()
         self.df = self._load_data()
         
-        # Pre-loaded tips database
         self.tips_db = {
             "Food": [
                 "🍱 Meal prepping can save you ₹2000/month!",
@@ -79,14 +69,12 @@ class BudgetAI:
         }
         
     def _load_data(self):
-        """Load data with memory optimization"""
         try:
             df = pd.read_csv(
                 self.file, 
                 parse_dates=['Date'],
                 dtype={'Amount': 'float32', 'Category': 'category'}
             )
-            # Ensure Date column is properly formatted
             df['Date'] = pd.to_datetime(df['Date'])
             return df
         except Exception as e:
@@ -94,13 +82,11 @@ class BudgetAI:
             return pd.DataFrame(columns=["Amount", "Category", "Date"])
 
     def _optimize_dataframe(self):
-        """Reduce memory usage"""
         if not self.df.empty:
             self.df['Category'] = self.df['Category'].astype('category')
             self.df['Amount'] = pd.to_numeric(self.df['Amount'], downcast='float')
 
     def log_expense(self, amount, description, date=None):
-        """Smart logging with auto-categorization"""
         try:
             category = self.classifier.classify(description)
             new_entry = {
@@ -117,13 +103,11 @@ class BudgetAI:
             return False
         
     def voice_log_expense(self):
-        """Process voice input like '500 rupees for pizza'"""
         try:
             spoken = self.voice.listen()
             if not spoken:
                 raise ValueError("Couldn't understand audio")
                 
-            # Extract amount and description
             amount = re.search(r"(\d+)\s*(rs|rupees|₹)?", spoken)
             desc = re.sub(r"\d+\s*(rs|rupees|₹)?\s*", "", spoken).strip()
             
@@ -140,7 +124,6 @@ class BudgetAI:
             return False
 
     def get_analysis(self):
-        """Lightning-fast analysis with caching"""
         if self.df.empty:
             return {"error": "No expenses logged yet"}
             
@@ -156,7 +139,6 @@ class BudgetAI:
             return {"error": f"Analysis error: {str(e)}"}
 
     def get_ai_tip(self):
-        """Context-aware tips"""
         if self.df.empty:
             return "💡 Start by logging your first expense!"
             
@@ -169,15 +151,11 @@ class BudgetAI:
             return "💡 Track your expenses to get personalized tips!"
 
     def predict_spending(self):
-        """Enhanced prediction with trend analysis"""
         if len(self.df) < 7:
             return "Need at least 7 entries for accurate predictions"
             
         try:
-            # Ensure Date column is datetime type
             self.df['Date'] = pd.to_datetime(self.df['Date'])
-            
-            # Create time-based features
             self.df['Days'] = (self.df['Date'] - self.df['Date'].min()).dt.days
             
             model = LinearRegression()
@@ -186,7 +164,6 @@ class BudgetAI:
             next_day = self.df['Days'].max() + 1
             prediction = model.predict([[next_day]])[0]
             
-            # Add trend analysis
             trend = "↑ Increasing" if model.coef_[0] > 0 else "↓ Decreasing"
             return f"Predicted: ₹{prediction:.2f} ({trend} trend)"
         
@@ -194,7 +171,6 @@ class BudgetAI:
             return f"Prediction error: {str(e)}"
 
     def show_insights(self):
-        """Interactive visual dashboard"""
         if self.df.empty:
             print("No data to visualize")
             return
@@ -202,14 +178,12 @@ class BudgetAI:
         try:
             plt.figure(figsize=(15, 5))
             
-            # Spending Trend
             plt.subplot(1, 3, 1)
             monthly = self.df.groupby(self.df['Date'].dt.to_period('M'))['Amount'].sum()
             monthly.plot(kind='bar', color='#4CAF50')
             plt.title("Monthly Spending Trend")
             plt.ylabel("Amount (₹)")
             
-            # Category Distribution
             plt.subplot(1, 3, 2)
             self.df['Category'].value_counts().plot.pie(
                 autopct='%1.1f%%', 
@@ -217,7 +191,6 @@ class BudgetAI:
             )
             plt.title("Spending by Category")
             
-            # Daily Heatmap
             plt.subplot(1, 3, 3)
             self.df['Weekday'] = self.df['Date'].dt.day_name()
             self.df['Hour'] = self.df['Date'].dt.hour
@@ -236,9 +209,6 @@ class BudgetAI:
         except Exception as e:
             print(f"Chart error: {str(e)}")
 
-# ========================
-# 🎮 Enhanced CLI Interface
-# ========================
 def run_app():
     ai = BudgetAI()
     
